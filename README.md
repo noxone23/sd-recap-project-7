@@ -408,4 +408,3 @@ At the end of the project, you show your app to the coaches and to each other: a
 - Check an API in Bruno, status codes and error cases included.
 - Plan and review the work of a coding agent.
 - Keep secrets out of prompts, code and the repository.
-
