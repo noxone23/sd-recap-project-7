@@ -1,6 +1,12 @@
 import { Router } from "express";
+import { TodoModel, toTodo } from "../models/Todo.js";
 
 export const todosRouter = Router();
+
+todosRouter.get("/", async (request, response) => {
+  const todos = await TodoModel.find();
+  response.json(todos.map(toTodo));
+});
 
 // Issue 2: add the routes here. The router is already mounted on /api/todos in app.ts.
 //
