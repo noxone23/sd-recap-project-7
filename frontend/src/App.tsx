@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from "react";
 import useSWR from "swr";
 
-import { createTodo, fetchTodos } from "./api";
+import { createTodo, fetchTodos, updateTodo } from "./api";
+import type { Todo } from "./types";
 
 export default function App() {
   const { data: todos, isLoading, mutate } = useSWR("todos", fetchTodos);
@@ -11,6 +12,11 @@ export default function App() {
     event.preventDefault();
     await createTodo(title.trim());
     setTitle("");
+    await mutate();
+  }
+
+  async function handleToggle(todo: Todo) {
+    await updateTodo({ ...todo, done: !todo.done });
     await mutate();
   }
 
@@ -37,7 +43,11 @@ export default function App() {
         {todos?.map((todo) => (
           <li key={todo.id} className="todo-item">
             <label className={todo.done ? "todo-title done" : "todo-title"}>
-              <input type="checkbox" checked={todo.done} readOnly />
+              <input
+                type="checkbox"
+                checked={todo.done}
+                onChange={() => handleToggle(todo)}
+              />
               {todo.title}
             </label>
           </li>
