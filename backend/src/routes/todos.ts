@@ -37,3 +37,12 @@ todosRouter.put("/:id", async (request, response) => {
   }
   response.json(toTodo(todo));
 });
+
+todosRouter.delete("/:id", async (request, response) => {
+  const todo = await TodoModel.findByIdAndDelete(request.params.id);
+  if (!todo) {
+    response.status(404).json({ error: "Todo not found" });
+    return;
+  }
+  response.status(204).send();
+});
