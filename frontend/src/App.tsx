@@ -7,6 +7,8 @@ import type { Todo } from "./types";
 export default function App() {
   const { data: todos, isLoading, mutate } = useSWR("todos", fetchTodos);
   const [title, setTitle] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -17,6 +19,22 @@ export default function App() {
 
   async function handleToggle(todo: Todo) {
     await updateTodo({ ...todo, done: !todo.done });
+    await mutate();
+  }
+
+  function handleEdit(todo: Todo) {
+    setEditingId(todo.id);
+    setEditTitle(todo.title);
+  }
+
+  function handleCancel() {
+    setEditingId(null);
+  }
+
+  async function handleSave(event: FormEvent<HTMLFormElement>, todo: Todo) {
+    event.preventDefault();
+    await updateTodo({ ...todo, title: editTitle.trim() });
+    setEditingId(null);
     await mutate();
   }
 
@@ -42,14 +60,42 @@ export default function App() {
       <ul className="todo-list">
         {todos?.map((todo) => (
           <li key={todo.id} className="todo-item">
-            <label className={todo.done ? "todo-title done" : "todo-title"}>
-              <input
-                type="checkbox"
-                checked={todo.done}
-                onChange={() => handleToggle(todo)}
-              />
-              {todo.title}
-            </label>
+            {editingId === todo.id ? (
+              <form
+                className="todo-form"
+                onSubmit={(event) => handleSave(event, todo)}
+              >
+                <label className="visually-hidden" htmlFor="edit-title">
+                  Edit title
+                </label>
+                <input
+                  id="edit-title"
+                  value={editTitle}
+                  onChange={(event) => setEditTitle(event.target.value)}
+                  autoFocus
+                />
+                <button type="submit" disabled={editTitle.trim() === ""}>
+                  Save
+                </button>
+                <button type="button" onClick={handleCancel}>
+                  Cancel
+                </button>
+              </form>
+            ) : (
+              <>
+                <label className={todo.done ? "todo-title done" : "todo-title"}>
+                  <input
+                    type="checkbox"
+                    checked={todo.done}
+                    onChange={() => handleToggle(todo)}
+                  />
+                  {todo.title}
+                </label>
+                <button type="button" onClick={() => handleEdit(todo)}>
+                  Edit
+                </button>
+              </>
+            )}
           </li>
         ))}
       </ul>
