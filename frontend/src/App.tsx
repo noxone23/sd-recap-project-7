@@ -4,22 +4,41 @@ import useSWR from "swr";
 import { createTodo, deleteTodo, fetchTodos, updateTodo } from "./api";
 import type { Todo } from "./types";
 
+function errorMessage(err: unknown) {
+  return err instanceof Error ? err.message : "Something went wrong";
+}
+
 export default function App() {
-  const { data: todos, isLoading, mutate } = useSWR("todos", fetchTodos);
+  const { data: todos, error, isLoading, mutate } = useSWR("todos", fetchTodos);
   const [title, setTitle] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await createTodo(title.trim());
-    setTitle("");
-    await mutate();
+    setActionError(null);
+    setIsAdding(true);
+    try {
+      await createTodo(title.trim());
+      setTitle("");
+      await mutate();
+    } catch (err) {
+      setActionError(errorMessage(err));
+    } finally {
+      setIsAdding(false);
+    }
   }
 
   async function handleToggle(todo: Todo) {
-    await updateTodo({ ...todo, done: !todo.done });
-    await mutate();
+    setActionError(null);
+    try {
+      await updateTodo({ ...todo, done: !todo.done });
+      await mutate();
+    } catch (err) {
+      setActionError(errorMessage(err));
+    }
   }
 
   function handleEdit(todo: Todo) {
@@ -33,14 +52,24 @@ export default function App() {
 
   async function handleSave(event: FormEvent<HTMLFormElement>, todo: Todo) {
     event.preventDefault();
-    await updateTodo({ ...todo, title: editTitle.trim() });
-    setEditingId(null);
-    await mutate();
+    setActionError(null);
+    try {
+      await updateTodo({ ...todo, title: editTitle.trim() });
+      setEditingId(null);
+      await mutate();
+    } catch (err) {
+      setActionError(errorMessage(err));
+    }
   }
 
   async function handleDelete(todo: Todo) {
-    await deleteTodo(todo.id);
-    await mutate();
+    setActionError(null);
+    try {
+      await deleteTodo(todo.id);
+      await mutate();
+    } catch (err) {
+      setActionError(errorMessage(err));
+    }
   }
 
   return (
@@ -56,12 +85,29 @@ export default function App() {
           onChange={(event) => setTitle(event.target.value)}
           placeholder="What do you have to do?"
         />
-        <button type="submit" disabled={title.trim() === ""}>
+        <button type="submit" disabled={title.trim() === "" || isAdding}>
           Add
         </button>
       </form>
+      {actionError && (
+        <p className="error" role="alert">
+          {actionError}
+        </p>
+      )}
       {isLoading && <p>Loading todos…</p>}
-      {todos?.length === 0 && <p>No todos yet. Nothing to do!</p>}
+      {error && (
+        <div>
+          <p className="error" role="alert">
+            Could not load the todos.
+          </p>
+          <button type="button" onClick={() => mutate()}>
+            Try again
+          </button>
+        </div>
+      )}
+      {!error && todos?.length === 0 && (
+        <p>No todos yet. Add your first todo above!</p>
+      )}
       <ul className="todo-list">
         {todos?.map((todo) => (
           <li key={todo.id} className="todo-item">
