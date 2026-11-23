@@ -38,3 +38,11 @@ export async function updateTodo(todo: Todo): Promise<Todo> {
   }
   return response.json();
 }
+
+export async function deleteTodo(id: string): Promise<void> {
+  const response = await fetch(`${API_URL}/todos/${id}`, { method: "DELETE" });
+  if (!response.ok) {
+    const { error } = await response.json();
+    throw new Error(error);
+  }
+}

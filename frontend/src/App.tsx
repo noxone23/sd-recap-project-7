@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import useSWR from "swr";
 
-import { createTodo, fetchTodos, updateTodo } from "./api";
+import { createTodo, deleteTodo, fetchTodos, updateTodo } from "./api";
 import type { Todo } from "./types";
 
 export default function App() {
@@ -35,6 +35,11 @@ export default function App() {
     event.preventDefault();
     await updateTodo({ ...todo, title: editTitle.trim() });
     setEditingId(null);
+    await mutate();
+  }
+
+  async function handleDelete(todo: Todo) {
+    await deleteTodo(todo.id);
     await mutate();
   }
 
@@ -93,6 +98,9 @@ export default function App() {
                 </label>
                 <button type="button" onClick={() => handleEdit(todo)}>
                   Edit
+                </button>
+                <button type="button" onClick={() => handleDelete(todo)}>
+                  Delete
                 </button>
               </>
             )}
