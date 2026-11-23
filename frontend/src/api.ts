@@ -12,3 +12,16 @@ export async function fetchTodos(): Promise<Todo[]> {
   }
   return response.json();
 }
+
+export async function createTodo(title: string): Promise<Todo> {
+  const response = await fetch(`${API_URL}/todos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+  if (!response.ok) {
+    const { error } = await response.json();
+    throw new Error(error);
+  }
+  return response.json();
+}
