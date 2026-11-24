@@ -3,8 +3,3 @@ export type Todo = {
   title: string;
   done: boolean;
 };
-
-export type NewTodo = {
-  title: string;
-  done: boolean;
-};
