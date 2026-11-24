@@ -202,3 +202,16 @@ button:disabled {
     transition: none !important;
   }
 }
+
+.filter {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.filter .active {
+  font-weight: bold;
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}

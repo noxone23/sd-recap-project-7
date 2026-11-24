@@ -5,7 +5,11 @@ import type { NewTodo } from "../types.js";
 export const todosRouter = Router();
 
 todosRouter.get("/", async (request, response) => {
-  const todos = await TodoModel.find();
+  const { done } = request.query;
+  // Without done (or with any other value) there is no filter, so all todos come back.
+  const filter =
+    done === "true" ? { done: true } : done === "false" ? { done: false } : {};
+  const todos = await TodoModel.find(filter);
   response.json(todos.map(toTodo));
 });
 

@@ -3,3 +3,5 @@ export type Todo = {
   title: string;
   done: boolean;
 };
+
+export type Filter = "all" | "open" | "done";
