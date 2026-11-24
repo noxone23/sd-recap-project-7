@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 try {
   process.loadEnvFile();
 } catch {
-  // No .env file: fine, the variables may come from the environment.
+
 }
 
 export async function connectToDatabase(): Promise<void> {

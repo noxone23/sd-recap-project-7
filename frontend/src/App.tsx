@@ -1,22 +1,28 @@
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import useSWR from "swr";
 
 import { createTodo, deleteTodo, fetchTodos, updateTodo } from "./api";
-import type { Todo } from "./types";
+import type { Filter, Todo } from "./types";
 
 function errorMessage(err: unknown) {
   return err instanceof Error ? err.message : "Something went wrong";
 }
 
 export default function App() {
-  const { data: todos, error, isLoading, mutate } = useSWR("todos", fetchTodos);
+  const [filter, setFilter] = useState<Filter>("all");
+  const {
+    data: todos,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR(["todos", filter] as const, ([, current]) => fetchTodos(current));
   const [title, setTitle] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setActionError(null);
     setIsAdding(true);
@@ -50,7 +56,7 @@ export default function App() {
     setEditingId(null);
   }
 
-  async function handleSave(event: FormEvent<HTMLFormElement>, todo: Todo) {
+  async function handleSave(event: SubmitEvent<HTMLFormElement>, todo: Todo) {
     event.preventDefault();
     setActionError(null);
     try {
@@ -89,6 +95,32 @@ export default function App() {
           Add
         </button>
       </form>
+      <div className="filter">
+        <button
+          type="button"
+          className={filter === "all" ? "active" : ""}
+          aria-pressed={filter === "all"}
+          onClick={() => setFilter("all")}
+        >
+          All
+        </button>
+        <button
+          type="button"
+          className={filter === "open" ? "active" : ""}
+          aria-pressed={filter === "open"}
+          onClick={() => setFilter("open")}
+        >
+          Open
+        </button>
+        <button
+          type="button"
+          className={filter === "done" ? "active" : ""}
+          aria-pressed={filter === "done"}
+          onClick={() => setFilter("done")}
+        >
+          Done
+        </button>
+      </div>
       {actionError && (
         <p className="error" role="alert">
           {actionError}
@@ -106,7 +138,11 @@ export default function App() {
         </div>
       )}
       {!error && todos?.length === 0 && (
-        <p>No todos yet. Add your first todo above!</p>
+        <p>
+          {filter === "all" && "No todos yet. Add your first todo above!"}
+          {filter === "open" && "No open todos."}
+          {filter === "done" && "No done todos yet."}
+        </p>
       )}
       <ul className="todo-list">
         {todos?.map((todo) => (

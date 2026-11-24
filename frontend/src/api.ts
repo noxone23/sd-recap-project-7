@@ -1,10 +1,11 @@
-import type { Todo } from "./types";
+import type { Filter, Todo } from "./types";
 
 // The backend allows requests from http://localhost:5173 (CORS), so the frontend can call it directly.
 export const API_URL = "http://localhost:3001/api";
 
-export async function fetchTodos(): Promise<Todo[]> {
-  const response = await fetch(`${API_URL}/todos`);
+export async function fetchTodos(filter: Filter): Promise<Todo[]> {
+  const query = filter === "all" ? "" : `?done=${filter === "done"}`;
+  const response = await fetch(`${API_URL}/todos${query}`);
   if (!response.ok) {
     throw new Error("Could not load the todos");
   }
