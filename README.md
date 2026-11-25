@@ -44,6 +44,7 @@ Open `backend/.env` and set:
 | ------------- | ---------------------------------------- | -------------------------------------- |
 | `MONGODB_URI` | Connection string of your database       | `mongodb://127.0.0.1:27017/todos`      |
 | `PORT`        | Port of the API (optional, default 3001) | `3001`                                 |
+| `CORS_ORIGIN` | Address of the frontend (CORS)           | `http://localhost:5173`           |
 
 For Atlas, use the connection string of your cluster and `todos` as the database name, for example `mongodb+srv://<user>:<password>@<cluster-host>/todos?retryWrites=true&w=majority`.
 
@@ -60,7 +61,15 @@ npm run dev
 
 The terminal prints that it is connected to the database and that the API runs on http://localhost:3001. Check it: http://localhost:3001/api/health answers `{ "status": "ok" }`.
 
-### 4. Start the frontend
+### 4. Create `frontend/.env`
+
+```
+VITE_API_URL=http://localhost:3001/api
+```
+
+`frontend/.env` is ignored by git. `frontend/src/api.ts` reads the address from `VITE_API_URL`.
+
+### 5. Start the frontend
 
 ```bash
 cd frontend
@@ -69,7 +78,18 @@ npm run dev
 
 Open http://localhost:5173. You see the page "Todos".
 
-The frontend calls the API at `http://localhost:3001/api` (set in `frontend/src/api.ts`). The backend only accepts requests from `http://localhost:5173` (CORS), so keep both ports.
+The backend only accepts requests from the address in `CORS_ORIGIN` (CORS), so keep `http://localhost:5173` and port 3001 locally.
+
+## Deployment on Render
+
+Backend and frontend run as two services on [render.com](https://render.com). The code is read from the `main` branch.
+
+1. **Atlas:** In "Network Access", allow `0.0.0.0/0`. Render has no fixed IP address.
+2. **Backend** (New, Web Service): Root Directory `backend`, Build Command `npm install`, Start Command `npm run start`. Variables: `MONGODB_URI` (your Atlas connection string) and `CORS_ORIGIN`. Render sets `PORT` itself. Check `https://<backend>.onrender.com/api/health`.
+3. **Frontend** (New, Static Site): Root Directory `frontend`, Build Command `npm install && npm run build`, Publish Directory `dist`. Variable: `VITE_API_URL` = `https://<backend>.onrender.com/api`. Set it before the build, it is baked into the app.
+4. **CORS:** Set `CORS_ORIGIN` of the backend to the address of the frontend, without a `/` at the end, for example `https://<frontend>.onrender.com`. The backend restarts.
+
+The free backend goes to sleep when nobody uses it. The first request afterwards can take about a minute.
 
 ## Scripts
 
