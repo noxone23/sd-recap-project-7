@@ -1,14 +1,25 @@
-import { useState, type SubmitEvent } from "react";
+import { useEffect, useState, type SubmitEvent } from "react";
 import useSWR from "swr";
 
 import { createTodo, deleteTodo, fetchTodos, updateTodo } from "./api";
 import type { Filter, Todo } from "./types";
+
+type Theme = "light" | "dark";
+
+function getInitialTheme(): Theme {
+  const saved = localStorage.getItem("theme");
+  if (saved === "light" || saved === "dark") {
+    return saved;
+  }
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
 
 function errorMessage(err: unknown) {
   return err instanceof Error ? err.message : "Something went wrong";
 }
 
 export default function App() {
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [filter, setFilter] = useState<Filter>("all");
   const {
     data: todos,
@@ -21,6 +32,11 @@ export default function App() {
   const [editTitle, setEditTitle] = useState("");
   const [actionError, setActionError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,7 +96,17 @@ export default function App() {
 
   return (
     <main>
-      <h1>Todos</h1>
+      <header className="header">
+        <h1>Todos</h1>
+        <button
+          type="button"
+          className="theme-toggle"
+          aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          {theme === "dark" ? "☀" : "☾"}
+        </button>
+      </header>
       <form className="todo-form" onSubmit={handleSubmit}>
         <label className="visually-hidden" htmlFor="new-title">
           New todo
@@ -126,7 +152,7 @@ export default function App() {
           {actionError}
         </p>
       )}
-      {isLoading && <p>Loading todos…</p>}
+      {isLoading && <p className="loading">Loading todos…</p>}
       {error && (
         <div>
           <p className="error" role="alert">
