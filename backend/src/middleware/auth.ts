@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import { fromNodeHeaders } from "better-auth/node";
 
+
 import { auth } from "../auth";
 
 export const requireAuth: RequestHandler<Record<string, string>> = async (
