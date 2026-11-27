@@ -3,6 +3,9 @@ import useSWR from "swr";
 
 import { createTodo, deleteTodo, fetchTodos, updateTodo } from "./api";
 import { LoginBar } from "./LoginBar"
+
+import { authClient } from "./auth-client";
+
 import type { Filter, Todo } from "./types";
 
 type Theme = "light" | "dark";
@@ -20,6 +23,9 @@ function errorMessage(err: unknown) {
 }
 
 export default function App() {
+
+  const { data: session, isPending } = authClient.useSession();
+
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [filter, setFilter] = useState<Filter>("all");
   const {
@@ -27,7 +33,9 @@ export default function App() {
     error,
     isLoading,
     mutate,
-  } = useSWR(["todos", filter] as const, ([, current]) => fetchTodos(current));
+  } = useSWR(
+    session ? (["todos", filter] as const) : null, ([, current]) => fetchTodos(current),
+  );
   const [title, setTitle] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -109,6 +117,10 @@ export default function App() {
           {theme === "dark" ? "☀" : "☾"}
         </button>
       </header>
+      {!isPending && !session ? (
+        <p>Log in with GitHub to see your todos.</p>
+      ) : (
+        <>
       <form className="todo-form" onSubmit={handleSubmit}>
         <label className="visually-hidden" htmlFor="new-title">
           New todo
@@ -216,7 +228,9 @@ export default function App() {
             )}
           </li>
         ))}
-      </ul>
+       </ul>
+        </>
+      )}
     </main>
   );
 }

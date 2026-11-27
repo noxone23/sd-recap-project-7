@@ -6,24 +6,35 @@ import { requireAuth } from "../middleware/auth.js";
 
 export const todosRouter = Router();
 
+todosRouter.use(requireAuth);
+
 todosRouter.get("/", async (request, response) => {
   const { done } = request.query;
+
+  const owner = response.locals.userId as string;
+
   // Without done (or with any other value) there is no filter, so all todos come back.
   const filter =
-    done === "true" ? { done: true } : done === "false" ? { done: false } : {};
+    done === "true" ? { done: true, owner } : done === "false" ? { done: false, owner } : { owner };
   const todos = await TodoModel.find(filter);
   response.json(todos.map(toTodo));
 });
 
-todosRouter.post("/", requireAuth, async (request, response) => {
+todosRouter.post("/", async (request, response) => {
   const { title } = (request.body ?? {}) as Partial<NewTodo>;
+
+  const owner = response.locals.userId as string;
+
   // The schema trims the title and rejects an empty one, the error handler turns that into a 400.
-  const todo = await TodoModel.create({ title });
+  const todo = await TodoModel.create({ title, owner });
   response.status(201).json(toTodo(todo));
 });
 
-todosRouter.put("/:id", requireAuth, async (request, response) => {
+todosRouter.put("/:id", async (request, response) => {
   const { title, done } = (request.body ?? {}) as Partial<NewTodo>;
+
+  const owner = response.locals.userId as string;
+
   // Without a title mongoose would skip the field and answer 200, so we reject it here.
   if (typeof title !== "string") {
     response
@@ -31,8 +42,8 @@ todosRouter.put("/:id", requireAuth, async (request, response) => {
       .json({ error: "A todo needs a title, and done must be true or false" });
     return;
   }
-  const todo = await TodoModel.findByIdAndUpdate(
-    request.params.id,
+  const todo = await TodoModel.findOneAndUpdate(
+    { _id: request.params.id, owner },
     { title, done },
     { returnDocument: "after", runValidators: true }
   );
@@ -44,9 +55,13 @@ todosRouter.put("/:id", requireAuth, async (request, response) => {
   response.json(toTodo(todo));
 });
 
-todosRouter.delete("/:id", requireAuth, async (request, response) => {
-  const todo = await TodoModel.findByIdAndDelete(request.params.id);
-  if (!todo) {
+todosRouter.delete("/:id", async (request, response) => {
+  const owner = response.locals.userId as string;
+  const todo = await TodoModel.findOneAndDelete({
+    _id: request.params.id,
+    owner,
+  });
+    if (!todo) {
     response.status(404).json({ error: "Todo not found" });
     return;
   }
