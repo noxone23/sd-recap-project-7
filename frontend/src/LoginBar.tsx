@@ -11,22 +11,24 @@ export function LoginBar() {
   }
 
   if (isPending) {
-    return <p>Loading...</p>;
+    return <div className="login-bar login-bar-loading">Loading…</div>
   }
 
   if (!session) {
     return (
-      <div>
-        <button onClick={login}>Log in with GitHub</button>
+      <div className="login-bar login-bar-out">
+        <button type="button" className="login-button" onClick={login}>
+          Log in with GitHub
+        </button>
       </div>
     );
   }
 
   return (
-    <div>
-      <img src={session.user.image ?? ""} alt="" width="40" height="40" />
-      <span>{session.user.name}</span>
-      <button onClick={logout}>Log out</button>
+    <div className="login-bar">
+      <img className="avatar" src={session.user.image ?? ""} alt="" width="36" height="36" />
+      <span className="login-name">{session.user.name}</span>
+      <button type="button" onClick={logout}>Log out</button>
     </div>
   );
 }

@@ -17,6 +17,7 @@
   --shadow: 0 0 40px rgba(0, 0, 0, 0.5);
   --control-height: 2.5rem;
   --field-height: 2.25rem;
+  --run-duration: 2.5s;
 }
 
 /* Light theme: App.tsx sets data-theme="light" on <html> */
@@ -97,6 +98,128 @@ h1 {
   background-clip: text;
   color: transparent;
   animation: title-shift 6s ease-in-out infinite alternate;
+}
+
+/* Login bar above the header */
+
+.login-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: calc(var(--field-height) + 1rem);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.login-bar-out {
+  justify-content: flex-end;
+}
+
+.login-bar-loading {
+  color: var(--muted);
+}
+
+/* The content fades in when it replaces "Loading…" */
+
+.login-bar > * {
+  animation: fade-in 0.3s ease-out;
+}
+
+.avatar {
+  flex-shrink: 0;
+  width: var(--field-height);
+  height: var(--field-height);
+  object-fit: cover;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--accent-glow);
+  transition: box-shadow 0.2s;
+}
+
+.avatar:hover {
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.login-name {
+  flex: 1;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.login-button {
+  font-weight: 600;
+  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  border-color: var(--accent);
+}
+
+/* Running lines: the parts all four share (login button, add button, add row, todos). Each one below only adds its own size, colour and hover rule. */
+
+.login-button::after,
+.todo-form button[type="submit"]::after,
+main > .todo-form::after,
+.todo-item::after {
+  content: "";
+  position: absolute;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Login button, add button and add row look the same */
+
+.login-button::after,
+.todo-form button[type="submit"]::after,
+main > .todo-form::after {
+  inset: -4px;
+  padding: 1px;
+  border-radius: calc(0.5rem + 4px);
+  background: linear-gradient(
+    90deg,
+    transparent 40%,
+    var(--accent) 48%,
+    #fff 52%,
+    transparent 60%
+  );
+  background-size: 300% 100%;
+  transition: opacity 0.2s;
+}
+
+/* A bright line runs around the login button on hover */
+
+.login-button {
+  position: relative;
+}
+
+.login-button:hover:not(:disabled)::after {
+  opacity: 1;
+  animation: run-line var(--run-duration) linear infinite;
+}
+
+/* Log out is quiet: no fill, colour only on hover */
+
+.login-bar button:not(.login-button) {
+  height: var(--field-height);
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
+}
+
+.login-bar button:not(.login-button):hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
 }
 
 /* Header with the theme button */
@@ -269,34 +392,15 @@ button:disabled {
   position: relative;
 }
 
-.todo-form button[type="submit"]::after {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  padding: 2px;
-  border-radius: calc(0.5rem + 4px);
-  background: conic-gradient(
-    from var(--angle),
-    transparent 0%,
-    transparent 55%,
-    var(--accent) 80%,
-    #fff 100%
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-
 .todo-form button[type="submit"]:hover:not(:disabled)::after {
   opacity: 1;
-  animation: run-border 1.5s linear infinite;
+  animation: run-line var(--run-duration) linear infinite;
+}
+
+/* While you type, the line around the whole row is enough */
+
+main > .todo-form:focus-within button[type="submit"]::after {
+  display: none;
 }
 
 /* A line runs around the add row while you type */
@@ -305,35 +409,9 @@ main > .todo-form {
   position: relative;
 }
 
-main > .todo-form::after {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  padding: 2px;
-  border-radius: calc(0.5rem + 4px);
-  background: linear-gradient(
-    90deg,
-    transparent 40%,
-    var(--accent) 48%,
-    #fff 52%,
-    transparent 60%
-  );
-  background-size: 300% 100%;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s;
-}
-
 main > .todo-form:focus-within::after {
   opacity: 1;
-  animation: run-line 2.5s linear infinite;
+  animation: run-line var(--run-duration) linear infinite;
 }
 
 /* Filter: one pill with three segments */
@@ -414,6 +492,20 @@ main > .todo-form:focus-within::after {
   margin: -0.5rem;
 }
 
+/* The bottom edge fades out while there is more to scroll. A short list has no scroll bar, so nothing fades. Browsers without scroll-driven animations show no fade. */
+
+@supports (animation-timeline: scroll()) {
+  .todo-list {
+    mask-image: linear-gradient(
+      to bottom,
+      #000 calc(100% - var(--fade-end)),
+      transparent
+    );
+    animation: scroll-fade linear both;
+    animation-timeline: scroll(self);
+  }
+}
+
 .todo-list::-webkit-scrollbar {
   width: 4px;
 }
@@ -471,8 +563,6 @@ main > .todo-form:focus-within::after {
 }
 
 .todo-item::after {
-  content: "";
-  position: absolute;
   inset: -1px;
   padding: 1px;
   border-radius: 0.625rem;
@@ -484,21 +574,12 @@ main > .todo-form:focus-within::after {
     transparent 60%
   );
   background-size: 300% 100%;
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box exclude,
-    linear-gradient(#000 0 0);
-  opacity: 0;
-  pointer-events: none;
   transition: opacity 0.3s;
 }
 
 .todo-item:hover::after {
   opacity: 1;
-  animation: run-line 2.5s linear infinite;
+  animation: run-line var(--run-duration) linear infinite;
 }
 
 .todo-item:has(.todo-title.done) {
@@ -507,6 +588,17 @@ main > .todo-form:focus-within::after {
 
 .todo-item:has(.todo-title.done):hover {
   opacity: 1;
+}
+
+/* Light theme: a done todo turns slightly blue, as dark mode turns it grey */
+
+:root[data-theme="light"] .todo-item:has(.todo-title.done) {
+  background: rgba(var(--accent-rgb), 0.08);
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+
+:root[data-theme="light"] .todo-title.done {
+  color: var(--accent-strong);
 }
 
 .todo-title {
@@ -518,11 +610,15 @@ main > .todo-form:focus-within::after {
   padding: 0.5rem 0;
   overflow-wrap: anywhere;
   cursor: pointer;
-  transition: color 0.2s;
+  text-decoration: line-through;
+  text-decoration-color: transparent;
+  transition:
+    color 0.2s,
+    text-decoration-color 0.2s;
 }
 
 .todo-title.done {
-  text-decoration: line-through;
+  text-decoration-color: currentColor;
   color: var(--muted);
 }
 
@@ -577,10 +673,10 @@ main > .todo-form:focus-within::after {
   opacity: 0;
 }
 
-/* Edit and Delete show up on hover or keyboard focus. Touch screens have no hover, so they stay visible. */
+/* Edit and Delete show up on hover or keyboard focus. A mouse click on the checkbox does not count as keyboard focus. Touch screens have no hover, so they stay visible. */
 
 .todo-item:hover > button,
-.todo-item:focus-within > button {
+.todo-item:has(:focus-visible) > button {
   opacity: 1;
 }
 
@@ -622,15 +718,21 @@ main > .todo-form:focus-within::after {
 
 /* Animations */
 
-@property --angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
+@property --fade-end {
+  syntax: "<length>";
+  initial-value: 0px;
   inherits: false;
 }
 
-@keyframes run-border {
-  to {
-    --angle: 360deg;
+/* Fade size of the todo list: full while scrolling, gone at the very end */
+
+@keyframes scroll-fade {
+  0%,
+  90% {
+    --fade-end: 1.5rem;
+  }
+  100% {
+    --fade-end: 0px;
   }
 }
 
@@ -707,6 +809,10 @@ main > .todo-form:focus-within::after {
     font-size: 1.75rem;
   }
 
+  .login-bar {
+    gap: 0.5rem;
+  }
+
   /* Smaller buttons leave more room for the title. All four have the same width. */
 
   .todo-item > button,
@@ -720,5 +826,14 @@ main > .todo-form:focus-within::after {
   * {
     animation: none !important;
     transition: none !important;
+  }
+
+  /* A standing line looks odd, so the running lines are hidden */
+
+  .login-button::after,
+  .todo-form button[type="submit"]::after,
+  main > .todo-form::after,
+  .todo-item::after {
+    display: none;
   }
 }
