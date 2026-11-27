@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { TodoModel, toTodo } from "../models/Todo.js";
 import type { NewTodo } from "../types.js";
+import { requireAuth } from "../middleware/auth.js";
+
 
 export const todosRouter = Router();
 
@@ -13,14 +15,14 @@ todosRouter.get("/", async (request, response) => {
   response.json(todos.map(toTodo));
 });
 
-todosRouter.post("/", async (request, response) => {
+todosRouter.post("/", requireAuth, async (request, response) => {
   const { title } = (request.body ?? {}) as Partial<NewTodo>;
   // The schema trims the title and rejects an empty one, the error handler turns that into a 400.
   const todo = await TodoModel.create({ title });
   response.status(201).json(toTodo(todo));
 });
 
-todosRouter.put("/:id", async (request, response) => {
+todosRouter.put("/:id", requireAuth, async (request, response) => {
   const { title, done } = (request.body ?? {}) as Partial<NewTodo>;
   // Without a title mongoose would skip the field and answer 200, so we reject it here.
   if (typeof title !== "string") {
@@ -42,7 +44,7 @@ todosRouter.put("/:id", async (request, response) => {
   response.json(toTodo(todo));
 });
 
-todosRouter.delete("/:id", async (request, response) => {
+todosRouter.delete("/:id", requireAuth, async (request, response) => {
   const todo = await TodoModel.findByIdAndDelete(request.params.id);
   if (!todo) {
     response.status(404).json({ error: "Todo not found" });

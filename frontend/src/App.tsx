@@ -2,6 +2,7 @@ import { useEffect, useState, type SubmitEvent } from "react";
 import useSWR from "swr";
 
 import { createTodo, deleteTodo, fetchTodos, updateTodo } from "./api";
+import { LoginBar } from "./LoginBar"
 import type { Filter, Todo } from "./types";
 
 type Theme = "light" | "dark";
@@ -96,6 +97,7 @@ export default function App() {
 
   return (
     <main>
+    <LoginBar />
       <header className="header">
         <h1>Todos</h1>
         <button
