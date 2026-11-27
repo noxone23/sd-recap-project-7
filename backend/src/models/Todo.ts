@@ -4,6 +4,7 @@ import type { Todo } from "../types.js";
 const todoSchema = new Schema({
   title: { type: String, required: true, trim: true },
   done: { type: Boolean, default: false },
+  owner: { type: String, required: true }
 });
 
 export const TodoModel = model("Todo", todoSchema);

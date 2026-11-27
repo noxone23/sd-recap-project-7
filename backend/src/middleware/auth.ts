@@ -17,5 +17,6 @@ export const requireAuth: RequestHandler<Record<string, string>> = async (
     return;
   }
 
+  response.locals.userId = session.user.id;
   next();
 };

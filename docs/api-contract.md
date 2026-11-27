@@ -14,12 +14,12 @@ A response contains exactly these three fields: no `_id` and no `__v`.
 
 | Method and path         | Body                  | Success                  | Errors                                                                                   |
 | ----------------------- | --------------------- | ------------------------ | -----------------------------------------------------------------------------------------|
-| `GET /api/health`       |                       | 200 `{ "status": "ok" }` | 400 `{ "error": "<message>" }`, 401 `{ "error": "Not logged in" }`                       |                                                                                         |
-| `GET /api/todos`        |                       | 200 `Todo[]`             | 400 `{ "error": "<message>" }`, 404 `Todo not found`, 401 `{ "error": "Not logged in" }` |                                                                                         |
-| `POST /api/todos`       | `{ "title": "..." }`  | 201 `Todo`               | 404 `{ "error": "Todo not found" }`, 401 `{ "error": "Not logged in" }`                  |
-| `PUT /api/todos/:id`    | `{ "title", "done" }` | 200 `Todo`               | 404 `{ "error": "Not found" }`                                                           |
-| `DELETE /api/todos/:id` |                       | 204, no body             |                                                                                          |
-| any other route         |                       |                          |                                                                                          |
+| `GET /api/health`       |                       | 200 `{ "status": "ok" }` |                                                                                          |
+| `GET /api/todos`        |                       | 200 `Todo[]`             | 401 `{ "error": "Not logged in" }`                                                       |
+| `POST /api/todos`       | `{ "title": "..." }`  | 201 `Todo`               | 400 `{ "error": "<message>" }`, 401 `{ "error": "Not logged in" }`                       |
+| `PUT /api/todos/:id`    | `{ "title", "done" }` | 200 `Todo`               | 400 `{ "error": "<message>" }`, 404 `Todo not found`, 401 `{ "error": "Not logged in" }` |
+| `DELETE /api/todos/:id` |                       | 204, no body             | 404 `{ "error": "Todo not found" }`, 401 `{ "error": "Not logged in" }`                  |
+| any other route         |                       |                          | 404 `{ "error": "Not found" }`                                                           |
 
 - `GET /api/todos` takes the optional query parameter `done`. `?done=true` returns only the done todos, `?done=false` only the open ones. Without `done` (or with any other value) all todos are returned.
 - `POST` creates a todo with `done: false`. The title is trimmed. A missing or empty title gives 400.
