@@ -1,11 +1,6 @@
 import mongoose from "mongoose";
 
 // Read .env into process.env. A variable that is already set (terminal, hosting platform) wins.
-try {
-  process.loadEnvFile();
-} catch {
-
-}
 
 export async function connectToDatabase(): Promise<void> {
   await mongoose.connect(process.env.MONGODB_URI!);

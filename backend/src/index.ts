@@ -1,5 +1,7 @@
+import "./env";
 import { connectToDatabase } from "./db";
 import { app } from "./app";
+
 
 const PORT = Number(process.env.PORT ?? 3001);
 

@@ -1,7 +1,7 @@
 import type { Filter, Todo } from "./types";
 
 // The backend allows requests from http://localhost:5173 (CORS), so the frontend can call it directly.
-export const API_URL = import.meta.env.VITE_API_URL;
+export const API_URL = "/api";
 
 export async function fetchTodos(filter: Filter): Promise<Todo[]> {
   const query = filter === "all" ? "" : `?done=${filter === "done"}`;
